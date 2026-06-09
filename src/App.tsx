@@ -1,7 +1,6 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect } from 'react'
-import LandingPage from './pages/landing/LandingPage'
 import Splash from './pages/app/Splash'
 import Welcome from './pages/app/Welcome'
 import Register from './pages/app/Register'
@@ -81,7 +80,7 @@ function AppRoutes() {
     <div className="relative">
       <AnimatePresence mode="wait">
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<Navigate to="/splash" replace />} />
           <Route path="/splash" element={<Splash />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/register" element={<Register />} />
