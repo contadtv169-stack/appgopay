@@ -15,6 +15,8 @@ export interface CheckoutCustomization {
   logoText?: string
 }
 
+export type GatewayType = 'krypt' | 'abacate' | 'pixgo' | 'pixkey'
+
 export interface Link {
   id: string
   slug: string

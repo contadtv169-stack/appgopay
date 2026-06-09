@@ -12,7 +12,7 @@ import { formatCurrency, timeAgo } from '../../utils/format'
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { connectedGateway, balance, fetchBalance } = useGatewayStore()
+  const { connectedGateway, balance, fetchBalance, mode } = useGatewayStore()
   const { unreadCount } = useNotificationsStore()
   const { links } = useLinksStore()
   const [showBalance, setShowBalance] = useState(true)
@@ -115,7 +115,10 @@ export default function Dashboard() {
               <h2 className="text-3xl font-bold text-white mb-1 tracking-tight">
                 {showBalance ? formatCurrency(balance?.availableBalance || 0) : 'R$ ••••••'}
               </h2>
-              <p className="text-blue-200 text-xs">via {connectedGateway === 'krypt' ? 'KryptGateway' : 'AbacatePay'}</p>
+              <p className="text-blue-200 text-xs">
+                via {connectedGateway === 'krypt' ? 'KryptGateway' : connectedGateway === 'pixgo' ? 'PixGo API' : connectedGateway === 'pixkey' ? 'PIX Local' : 'AbacatePay'}
+                {mode === 'offline' ? ' 🔒 offline' : ''}
+              </p>
             </div>
           </motion.div>
 

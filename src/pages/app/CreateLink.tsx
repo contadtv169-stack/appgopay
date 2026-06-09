@@ -7,7 +7,8 @@ import Button from '../../components/Button'
 import { useGatewayStore } from '../../stores/gatewayStore'
 import { useLinksStore } from '../../stores/linksStore'
 import { useNotificationsStore } from '../../stores/notificationsStore'
-import { createPixCharge } from '../../utils/api'
+import { createPixCharge, pixgoCreatePayment } from '../../utils/api'
+import { generatePixPayload } from '../../utils/pix'
 import { generateSlug, generateId } from '../../utils/format'
 import type { CheckoutCustomization } from '../../utils/types'
 
@@ -86,18 +87,28 @@ export default function CreateLink() {
       checkout,
     }
 
-    if (connectedGateway === 'krypt' && credentials) {
+    if (connectedGateway && credentials) {
       try {
-        const pixResult = await createPixCharge(
-          credentials.ci,
-          credentials.cs,
-          rawAmount,
-          description.trim() || `Link GoPay ${finalSlug}`
-        )
-        linkData.transactionId = pixResult.data.transactionId
-        linkData.qrCodeBase64 = pixResult.data.qrCodeBase64
-        linkData.copyPaste = pixResult.data.copyPaste
-        linkData.paymentLink = pixResult.data.paymentLink
+        if (connectedGateway === 'krypt') {
+          const pixResult = await createPixCharge(credentials.ci, credentials.cs, rawAmount, description.trim() || `Link GoPay ${finalSlug}`)
+          linkData.transactionId = pixResult.data.transactionId
+          linkData.qrCodeBase64 = pixResult.data.qrCodeBase64
+          linkData.copyPaste = pixResult.data.copyPaste
+          linkData.paymentLink = pixResult.data.paymentLink
+        } else if (connectedGateway === 'pixgo') {
+          const pixResult = await pixgoCreatePayment(credentials.apiKey, rawAmount, description.trim() || `Link GoPay ${finalSlug}`, id)
+          linkData.transactionId = pixResult.transactionId
+          linkData.qrCodeBase64 = pixResult.qrImageUrl
+          linkData.copyPaste = pixResult.copyPaste
+          linkData.paymentLink = `${window.location.origin}/appgopay/#/checkout/${finalSlug}`
+        } else if (connectedGateway === 'pixkey') {
+          const pixPayload = generatePixPayload({ key: credentials.pixKey, amount: rawAmount, description: description.trim(), txid: id, name: credentials.name, city: credentials.city })
+          if (pixPayload) {
+            linkData.copyPaste = pixPayload
+            linkData.qrCodeBase64 = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixPayload)}`
+            linkData.paymentLink = `${window.location.origin}/appgopay/#/checkout/${finalSlug}`
+          }
+        }
       } catch (err: any) {
         setError(err.message || 'Erro ao gerar cobrança')
         setLoading(false)

@@ -35,7 +35,8 @@ CREATE POLICY "Usuário pode atualizar próprio perfil"
 CREATE TABLE IF NOT EXISTS gateway_connections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  gateway TEXT NOT NULL CHECK (gateway IN ('krypt', 'abacate')),
+  gateway TEXT NOT NULL CHECK (gateway IN ('krypt', 'abacate', 'pixgo', 'pixkey')),
+  mode TEXT DEFAULT 'api' CHECK (mode IN ('api', 'offline')),
   credentials JSONB NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id) -- apenas 1 gateway por usuário
